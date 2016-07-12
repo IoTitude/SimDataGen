@@ -10,7 +10,6 @@ from data_format import *
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import re
-import random
 
 class SimDataGen(object):
 
@@ -119,6 +118,8 @@ class SimDataGen(object):
 			db_ids = self.cas_conn2.fetchIds()
 
 			id_same = False
+			increment = 10
+			incrementparam = 0
 
 			self.threading_is2 = True
 
@@ -126,9 +127,9 @@ class SimDataGen(object):
 
 				i = 0
 				wellid = 1000
-				choosables = [0, 10, 20, 30, 40, 50]
-				incrementparam = random.choice(choosables)
-				increment = 10
+
+				if (incrementparam > 60):
+					incrementparam = 0
 			
 				# Suspend execution for the amount of time specified in delay_time
 				sleep(self.delay_time)
@@ -143,15 +144,10 @@ class SimDataGen(object):
 
 					self.cas_conn2.sendMeterwellData(id_same, wellid, "loc-" + str(wellid), wellid, wellid, wellid, wellid, wellid, 0, incrementparam, incrementparam)
 
-					incrementparam = incrementparam + increment
-
-					if (incrementparam < 10):
-						increment = 10
-					elif (incrementparam > 50):
-						increment = -10
-
 					wellid = wellid + 1
 					i = i + 1
+
+				incrementparam = incrementparam + increment
 
 		except Exception as e:
 			logData("SDG_bl/thousandMeterThread", str(e), False)
@@ -272,14 +268,14 @@ class SimDataGen(object):
 	def displayLocations(self):
 		locations = self.cas_conn.locationData()
 		rowcount = self.cas_conn.fetchRowcount()
-		nameList = [None] * rowcount[0]
-		waterList = [None] * rowcount[0]
-		flowList = [None] * rowcount[0]
+		nameList = [None] * 10
+		waterList = [None] * 10
+		flowList = [None] * 10
 
 		for eachLine in locations:
 		
 			i = 0
-			while (i <= rowcount[0]):
+			while (i < 10):
 				if (eachLine[0] == "loc-" + str(i + 1)):
 					nameList[i] = eachLine[0]
 					waterList[i] = eachLine[1]
@@ -288,7 +284,7 @@ class SimDataGen(object):
 				i = i + 1
 
 		i = 0
-		while (i < rowcount[0]):
+		while (i < 10):
 			print str(i) + ". " + str(nameList[i]) + "			Water surface: " + str(waterList[i]) + "			Water flow: " + str(flowList[i]) + "\n"
 			i = i + 1
 
@@ -374,60 +370,75 @@ class SimDataGen(object):
 			i = i + 1
 
 	def animate(self, i):
-		pullData = self.cas_conn.fetchWatersurface()
-		pullName = self.cas_conn.fetchName()
-		rowcount = self.cas_conn.fetchRowcount()
-		nameList = [None] * rowcount[0]
-		errList = [None] * rowcount[0]
-		resultList = [None] * rowcount[0]
-		correctresList = [None] * rowcount[0]
-		xar = []
-		yar = []
+		try:
+			pullInfo = self.cas_conn.fetchInfo()
+			nameList = [None] * 10
+			resultList = [None] * 10
+			xar = []
+			yar = []
 
-		xar.append(0)
-		yar.append(0)
+			xar.append(0)
+			yar.append(0)
 
-		# Sort nameList in the correct order and fill errList with the incorrect order existing in the database
-		t = 0
-		for eachName in pullName:
+			# Sort nameList in the correct order and fill errList with the incorrect order existing in the database
+			for eachInfo in pullInfo:
 
-			errList[t] = str(eachName[0])
+				if (eachInfo[0] == 1):
+					nameList[0] = str(eachInfo[1])
+					resultList[0] = str(eachInfo[2])
 
-			u = 0
-			while (u <= rowcount[0]):
-				locName = "loc-" + str(u)
+				elif (eachInfo[0] == 10):
+					nameList[1] = str(eachInfo[1])
+					resultList[1] = str(eachInfo[2])
 
-				if (eachName[0] == locName):
-					nameList[u - 1] = str(eachName[0])
-				u = u + 1
-			t = t + 1
+				elif (eachInfo[0] == 20):
+					nameList[2] = str(eachInfo[1])
+					resultList[2] = str(eachInfo[2])
 
-		# Compare nameList and errList to sort resultList in the correct order
-		t = 0
-		for eachLine in pullData:
+				elif (eachInfo[0] == 30):
+					nameList[3] = str(eachInfo[1])
+					resultList[3] = str(eachInfo[2])
 
-			u = 0
-			while (u < rowcount[0]):
-				
-				if (errList[t] == nameList[u]):
+				elif (eachInfo[0] == 40):
+					nameList[4] = str(eachInfo[1])
+					resultList[4] = str(eachInfo[2])
 
-					correctresList[u] = eachLine[0]
-				
-				u = u + 1
-			t = t + 1
+				elif (eachInfo[0] == 50):
+					nameList[5] = str(eachInfo[1])
+					resultList[5] = str(eachInfo[2])
 
-		# Set the correctly ordered lists together
-		a = 0
-		i = 1
-		while (a < rowcount[0]):
+				elif (eachInfo[0] == 60):
+					nameList[6] = str(eachInfo[1])
+					resultList[6] = str(eachInfo[2])
 
-			xar.append(i)
-			yar.append(correctresList[a])
-			i = i + 1
-			a = a + 1
+				elif (eachInfo[0] == 70):
+					nameList[7] = str(eachInfo[1])
+					resultList[7] = str(eachInfo[2])
 
-		self.ax1.clear()
-		self.ax1.plot(xar, yar)
+				elif (eachInfo[0] == 80):
+					nameList[8] = str(eachInfo[1])
+					resultList[8] = str(eachInfo[2])
+
+				elif (eachInfo[0] == 90):
+					nameList[9] = str(eachInfo[1])
+					resultList[9] = str(eachInfo[2])
+
+			# Set the correctly ordered lists together
+			a = 0
+			i = 1
+			while (a < len(resultList)):
+
+				xar.append(i)
+				yar.append(resultList[a])
+				i = i + 1
+				a = a + 1
+
+			self.ax1.clear()
+			self.ax1.plot(xar, yar)
+
+		except Exception as e:
+			logData("SDG_bl/animate", str(e), False)
+			print e
 
 
 	# Function for fetching data from the database and displaying it at set intervals

@@ -79,6 +79,19 @@ class DatabaseSession(object):
 		else:
 			print "Database Error: Failed to get well data from database"
 
+	def fetchInfo(self):
+		if (self.connection == True):
+			try:
+				table = modl.getTable()
+
+				db_info = self.session.execute('SELECT id, nimi, vedenpinta FROM ' + table)
+				return db_info
+			except Exception as e:
+				logData("database_connect/fetchIds", str(e), False)
+				print "Database Error: ", e
+		else:
+			print "Database Error: Failed to get id's from database"
+
 	def fetchIds(self):
 		if (self.connection == True):
 			try:
@@ -157,12 +170,13 @@ class DatabaseSession(object):
 			try:
 				table = modl.getTable()
 				delid = c_id
+				i = 0
 
-				while (delid < rowcount[0]):
-						self.session.execute("DELETE FROM " + table + " WHERE id = " + str(delid) + " AND east = " + str(delid) + " AND paine = 0 IF EXISTS")
+				while (i < rowcount[0]):
+						self.session.execute("DELETE FROM " + table + " WHERE id = " + str(delid))
 
 						delid = delid + 1
-						logData("database_connect/deleteManyRows", "Delete id: " + str(delid) + ", Rowcount: " + str(rowcount[0]), False)
+						i = i + 1
 
 			except Exception as e:
 				logData("database_connect/deleteManyRows", str(e), False)
